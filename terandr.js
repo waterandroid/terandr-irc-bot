@@ -4,7 +4,7 @@ var settings = require("./settings");
 if (fs.existsSync("settings_dev.js")) {
 	settings = require("./settings_dev");
 }
-var plugins = require("./Plugins/spam-moderation/main");
+var plugins = require("./Plugins/terandr-spam-warning/main");
 
 var bot = new IRC(settings.botDetails);
 var mainChannel = settings.mainChannel;
@@ -13,12 +13,16 @@ var specialChar = settings.specialChar;
 var functions = plugins.functions;
 var onStart = plugins.onStart;
 var onMessage = plugins.onMessage;
+var pluginCommands = plugins.commands;
 
-var commands = {
-	help: function () {
-		console.log(onStart);
+var commands = [
+	{
+		help: function() {
+			console.log(pluginCommands);
+			console.log(commands);
+		}
 	}
-};
+];
 
 var adminCommands = {
 
@@ -62,19 +66,28 @@ bot.on("message", function(sender, channel, message) {
 		var parameters = message.substr(messageSplit + 1);
 		if (messageSplit < 0) command = message.substr(1);
 
-		if (commands[command] !== undefined) {
+		for (i = 0; i < commands.length; i++) {
+			if (commands[i][command]) {
+				commands[i][command]();
+			}
+		}
+
+		/*if (commands[command] !== undefined) {
 			commands[command](parameters, sender.nick, channel);
 		} else if ((adminCommands[command] !== undefined) && (adminCommand === true)) {
 			adminCommands[command](parameters, sender.nick, channel);
 		} else {
 			console.log("Unknown command from " + sender.nick + ": " + message);
-		}
+		}*/
 	}
 });
 
 function startupFunctions() {
 	for (i = 0; i < onStart.length; i++) {
 		functions[onStart[i]]();
+	}
+	for (i = 0; i < pluginCommands.length; i++) {
+		commands.push(pluginCommands[i]);
 	}
 	return true;
 }
