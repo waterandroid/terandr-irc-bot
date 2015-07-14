@@ -20,6 +20,14 @@ var commands = [
 		help: function() {
 			console.log(pluginCommands);
 			console.log(commands);
+		},
+		repeat: function(message, sender) {
+			if (sender == admin) {
+				console.log("Sending message to " + mainChannel + ": " + message);
+				bot.message(mainChannel, message);
+				return true;
+			}
+			return false;
 		}
 	}
 ];
@@ -40,6 +48,7 @@ bot.on("registered", function() {
 	if (mainChannel) {
 		bot.join(mainChannel);
 	}
+	bot.message("NickServ", "IDENTIFY " + settings.idPassword);
 	console.log("Bot registered");
 	if (startupFunctions()) {
 		console.log("Loaded plugins running");

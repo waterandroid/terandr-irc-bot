@@ -5,5 +5,6 @@ module.exports = {
   },
   mainChannel: "",
   admin: "",
-  specialChar: "-"
+  specialChar: "-",
+  idPassword: ""
 };
