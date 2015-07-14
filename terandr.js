@@ -38,7 +38,7 @@ bot.on("connect", function() {
 
 bot.on("registered", function() {
 	if (mainChannel) {
-		  bot.join(mainChannel);
+		bot.join(mainChannel);
 	}
 	console.log("Bot registered");
 	if (startupFunctions()) {
@@ -51,13 +51,6 @@ bot.on("join", function(user, channel) {
 });
 
 bot.on("message", function(sender, channel, message) {
-	var commandAccess;
-	var adminCommand = false;
-  if (sender.hostmask == admin) {
-		console.log("Sent From Admin");
-		adminCommand = true;
-		adminNick = sender.nick;
-	}
 	messageFunctions(sender, channel, message);
 
 	if (message.charAt(0) == specialChar) {
@@ -68,24 +61,14 @@ bot.on("message", function(sender, channel, message) {
 
 		for (i = 0; i < commands.length; i++) {
 			if (commands[i][command]) {
-				commands[i][command]();
+				commands[i][command](parameters, sender.nick);
 			}
 		}
-
-		/*if (commands[command] !== undefined) {
-			commands[command](parameters, sender.nick, channel);
-		} else if ((adminCommands[command] !== undefined) && (adminCommand === true)) {
-			adminCommands[command](parameters, sender.nick, channel);
-		} else {
-			console.log("Unknown command from " + sender.nick + ": " + message);
-		}*/
 	}
 });
 
 function startupFunctions() {
-	for (i = 0; i < onStart.length; i++) {
-		functions[onStart[i]]();
-	}
+	onStart();
 	for (i = 0; i < pluginCommands.length; i++) {
 		commands.push(pluginCommands[i]);
 	}
