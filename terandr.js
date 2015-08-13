@@ -15,22 +15,20 @@ var onStart = plugins.onStart;
 var onMessage = plugins.onMessage;
 var pluginCommands = plugins.commands;
 
-var commands = [
-	{
-		help: function() {
-			console.log(pluginCommands);
-			console.log(commands);
-		},
-		repeat: function(message, sender) {
-			if (sender == admin) {
-				console.log("Sending message to " + mainChannel + ": " + message);
-				bot.message(mainChannel, message);
-				return true;
-			}
-			return false;
+var commands = {
+	help: function() {
+		console.log(pluginCommands);
+		console.log(commands);
+	},
+	repeat: function(message, sender) {
+		if (sender == admin) {
+			console.log("Sending message to " + mainChannel + ": " + message);
+			bot.message(mainChannel, message);
+			return true;
 		}
+		return false;
 	}
-];
+};
 
 var adminCommands = {
 
@@ -68,18 +66,17 @@ bot.on("message", function(sender, channel, message) {
 		var parameters = message.substr(messageSplit + 1);
 		if (messageSplit < 0) command = message.substr(1);
 
-		for (i = 0; i < commands.length; i++) {
-			if (commands[i][command]) {
-				commands[i][command](parameters, sender.nick);
-			}
+		if (commands[command]) {
+			commands[command](parameters, sender.nick);
 		}
 	}
 });
 
 function startupFunctions() {
 	onStart();
-	for (i = 0; i < pluginCommands.length; i++) {
-		commands.push(pluginCommands[i]);
+	for (var c in pluginCommands) {
+		commands[c] = pluginCommands[c];
+		console.log(commands);
 	}
 	return true;
 }
