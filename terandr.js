@@ -11,16 +11,36 @@ try {
 		throw new Error("settings.js does not exist or cannot be read");
 	}
 }
-var plugins = require("./Plugins/terandr-spam-warning/main");
+var plugins;
+var functions = {};
+var onRegister = [];
+var onMessage = [];
+var pluginCommands = {};
+
+fs.readdir("./Plugins/", function(err, files) {
+	for (i = 0; i < files.length; i++) {
+		plugins = require("./Plugins/"+ files[i] + "/main");
+		for (var func in plugins.functions) {
+			functions[func] = plugins.functions[func];
+		}
+		onRegister.push(plugins.onRegister);
+		for (j = 0; j < plugins.onMessage.length; j++) {
+			onMessage.push(plugins.onMessage[j]);
+		}
+		for (var comm in plugins.commands) {
+			pluginCommands[comm] = plugins.commands[comm];
+		}
+	}
+	if (startupFunctions()) {
+		console.log("Loaded plugins running");
+		bot.connect();
+	}
+});
 
 var bot = new IRC(settings.botDetails);
 var mainChannel = settings.mainChannel;
 var admin = settings.admin;
 var specialChar = settings.specialChar;
-var functions = plugins.functions;
-var onStart = plugins.onStart;
-var onMessage = plugins.onMessage;
-var pluginCommands = plugins.commands;
 
 var commands = {
 	help: function() {
@@ -43,8 +63,6 @@ var adminCommands = {
 
 exports.bot = bot;
 
-bot.connect();
-
 bot.on("connect", function() {
   console.log("Bot connected");
 });
@@ -53,11 +71,11 @@ bot.on("registered", function() {
 	if (mainChannel) {
 		bot.join(mainChannel);
 	}
+	for (i = 0; i < onRegister.length; i++) {
+		onRegister[i]();
+	}
 	bot.message("NickServ", "IDENTIFY " + settings.idPassword);
 	console.log("Bot registered");
-	if (startupFunctions()) {
-		console.log("Loaded plugins running");
-	}
 });
 
 bot.on("join", function(user, channel) {
@@ -80,17 +98,17 @@ bot.on("message", function(sender, channel, message) {
 });
 
 function startupFunctions() {
-	onStart();
 	for (var c in pluginCommands) {
 		commands[c] = pluginCommands[c];
-		console.log(commands);
 	}
 	return true;
 }
 
 function messageFunctions(sender, channel, message) {
 	for (i = 0; i < onMessage.length; i++) {
-		functions[onMessage[i]](sender, channel, message);
+		if (functions[onMessage[i]](sender, channel, message) === true) {
+			break;
+		}
 	}
 	return true;
 }
