@@ -43,9 +43,11 @@ var admin = settings.admin;
 var specialChar = settings.specialChar;
 
 var commands = {
-	help: function() {
-		console.log(pluginCommands);
+	help: function(parameters, sender) {
 		console.log(commands);
+		for (var comm in commands) {
+			bot.message(sender, specialChar + comm);
+		}
 	},
 	repeat: function(message, sender) {
 		if (sender == admin) {
@@ -92,7 +94,7 @@ bot.on("message", function(sender, channel, message) {
 		if (messageSplit < 0) command = message.substr(1);
 
 		if (commands[command]) {
-			commands[command](parameters, sender.nick);
+			commands[command](parameters, sender.nick, channel);
 		}
 	}
 });
