@@ -19,7 +19,11 @@ var pluginCommands = {};
 
 fs.readdir("./Plugins/", function(err, files) {
 	for (i = 0; i < files.length; i++) {
-		plugins = require("./Plugins/"+ files[i] + "/main");
+		try {
+			plugins = require("./Plugins/"+ files[i] + "/main");
+		} catch (e) {
+			console.log("Cannot load main.js from: " + files[i]);
+		}
 		for (var func in plugins.functions) {
 			functions[func] = plugins.functions[func];
 		}
