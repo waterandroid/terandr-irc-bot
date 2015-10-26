@@ -18,27 +18,31 @@ var onMessage = [];
 var pluginCommands = {};
 
 fs.readdir("./Plugins/", function(err, files) {
-	for (i = 0; i < files.length; i++) {
-		try {
-			plugins = require("./Plugins/"+ files[i] + "/main");
-		} catch (e) {
-			console.log("Cannot load main.js from: " + files[i]);
+	if (files) {
+		for (i = 0; i < files.length; i++) {
+			try {
+				plugins = require("./Plugins/"+ files[i] + "/main");
+			} catch (e) {
+				console.log("Cannot load main.js from: " + files[i]);
+			}
+			try {
+				for (var func in plugins.functions) {
+					functions[func] = plugins.functions[func];
+				}
+				onRegister.push(plugins.onRegister);
+				for (j = 0; j < plugins.onMessage.length; j++) {
+					onMessage.push(plugins.onMessage[j]);
+				}
+				for (var comm in plugins.commands) {
+					pluginCommands[comm] = plugins.commands[comm];
+				}
+			} catch (e) {
+				console.log("ERROR in plugin: " + files[i]);
+				console.log(e);
+			}
 		}
-		try {
-			for (var func in plugins.functions) {
-				functions[func] = plugins.functions[func];
-			}
-			onRegister.push(plugins.onRegister);
-			for (j = 0; j < plugins.onMessage.length; j++) {
-				onMessage.push(plugins.onMessage[j]);
-			}
-			for (var comm in plugins.commands) {
-				pluginCommands[comm] = plugins.commands[comm];
-			}
-		} catch (e) {
-			console.log("ERROR in plugin: " + files[i]);
-			console.log(e);
-		}
+	} else {
+		console.log("ERROR: Either plugins could not be read or they do not exist.");
 	}
 	if (startupFunctions()) {
 		console.log("Loaded plugins running");
